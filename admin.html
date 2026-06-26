@@ -190,7 +190,7 @@
   <div class="upload-card">
     <h3>Adicionar nova foto</h3>
     <p class="upload-sub">Selecione ou arraste uma imagem para a galeria de obras.</p>
-    <form id="uploadForm" enctype="multipart/form-data">
+    <form id="uploadForm">
       <label class="dropzone" id="dropzone">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <span class="dz-text"><strong>Clique para escolher</strong> ou arraste a imagem aqui</span>
@@ -277,7 +277,7 @@ async function loadPhotos() {
     card.className = 'card';
     card.innerHTML = `
       <div class="thumb-wrap">
-        <img src="img/obras/${p.file}" alt="${p.alt}">
+        <img src="${p.url}" alt="${p.alt}">
         <button class="del" title="Remover" data-id="${p.id}">&times;</button>
       </div>
       <div class="alt">${p.alt}</div>
@@ -329,19 +329,53 @@ document.getElementById('removePreview').addEventListener('click', () => {
   setPreview(null);
 });
 
+// Redimensiona/comprime a imagem no navegador antes de enviar,
+// já que a função serverless tem limite de tamanho de payload.
+async function compressImage(file, maxDim = 1920, quality = 0.85) {
+  const bitmap = await createImageBitmap(file);
+  let { width, height } = bitmap;
+  if (width > maxDim || height > maxDim) {
+    const scale = maxDim / Math.max(width, height);
+    width = Math.round(width * scale);
+    height = Math.round(height * scale);
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+  return await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 document.getElementById('uploadForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const altInput = document.getElementById('altInput');
   const errEl = document.getElementById('uploadError');
   errEl.textContent = '';
   if (!fileInput.files[0]) return;
-  const fd = new FormData();
-  fd.append('photo', fileInput.files[0]);
-  fd.append('alt', altInput.value || 'Obra C&C Soluções');
   const submitBtn = e.target.querySelector('button[type="submit"]');
   submitBtn.disabled = true;
   try {
-    const r = await fetch('/api/photos', { method: 'POST', body: fd });
+    const compressed = await compressImage(fileInput.files[0]);
+    const dataBase64 = await blobToBase64(compressed);
+    const r = await fetch('/api/photos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filename: fileInput.files[0].name,
+        contentType: 'image/jpeg',
+        dataBase64,
+        alt: altInput.value || 'Obra C&C Soluções'
+      })
+    });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Erro ao enviar.');
     fileInput.value = '';

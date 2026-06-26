@@ -1,0 +1,10 @@
+[
+  { "id": "obra-1", "url": "/img/obras/obra-1.jpg", "alt": "Obra C&C Soluções 1" },
+  { "id": "obra-2", "url": "/img/obras/obra-2.jpg", "alt": "Obra C&C Soluções 2" },
+  { "id": "obra-3", "url": "/img/obras/obra-3.jpg", "alt": "Obra C&C Soluções 3" },
+  { "id": "obra-4", "url": "/img/obras/obra-4.jpg", "alt": "Obra C&C Soluções 4" },
+  { "id": "obra-5", "url": "/img/obras/obra-5.jpg", "alt": "Obra C&C Soluções 5" },
+  { "id": "obra-6", "url": "/img/obras/obra-6.jpg", "alt": "Obra C&C Soluções 6" },
+  { "id": "obra-7", "url": "/img/obras/obra-7.jpg", "alt": "Obra C&C Soluções 7" },
+  { "id": "obra-8", "url": "/img/obras/obra-8.jpg", "alt": "Obra C&C Soluções 8" }
+]
