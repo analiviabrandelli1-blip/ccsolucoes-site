@@ -6,3 +6,5 @@ data/admin.json
 data/server.pid
 data/server.log
 data/tunnel.log
+
+.vercel
