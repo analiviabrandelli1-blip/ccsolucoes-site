@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel Admin — C&amp;C Soluções</title>
+<style>
+  :root {
+    --navy: #14213d;
+    --navy-light: #1c2c52;
+    --green: #2e7d4f;
+    --green-light: #389a62;
+    --bg: #eef0f5;
+    --border: #dde1ea;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg); color: var(--navy); min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(120deg, var(--navy) 0%, var(--navy-light) 100%);
+    color: #fff; padding: 18px 5%;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 2px 12px rgba(20,30,60,0.18);
+  }
+  .header-title { display: flex; align-items: center; gap: 10px; }
+  .header-title svg { opacity: 0.85; flex-shrink: 0; }
+  header h1 { font-size: 1.1rem; margin: 0; font-weight: 600; letter-spacing: 0.2px; }
+  header .subtitle { font-size: 0.72rem; opacity: 0.65; margin-top: 1px; }
+  header button {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.35);
+    color: #fff; padding: 7px 16px; border-radius: 7px; cursor: pointer;
+    font-size: 0.82rem; transition: background 0.2s, border-color 0.2s;
+  }
+  header button:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.55); }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 36px 5% 60px; }
+
+  /* LOGIN */
+  .login-wrap {
+    min-height: calc(100vh - 70px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .login-box {
+    width: 100%; max-width: 380px; background: #fff; padding: 36px 32px;
+    border-radius: 14px; box-shadow: 0 20px 50px rgba(20,30,60,0.14);
+    border: 1px solid var(--border);
+  }
+  .login-box .lock-icon {
+    width: 46px; height: 46px; border-radius: 50%; background: rgba(46,125,79,0.1);
+    display: flex; align-items: center; justify-content: center; color: var(--green);
+    margin-bottom: 16px;
+  }
+  .login-box h2 { margin: 0 0 4px; font-size: 1.25rem; }
+  .login-box p.hint { margin: 0 0 18px; font-size: 0.82rem; color: #788; opacity: 0.75; }
+  .login-box label { display: block; font-size: 0.8rem; font-weight: 600; margin: 14px 0 6px; color: #3a4a6b; }
+  .login-box input {
+    width: 100%; padding: 11px 13px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 0.95rem; transition: border-color 0.2s;
+  }
+  .login-box input:focus { outline: none; border-color: var(--green-light); }
+  .login-box button {
+    margin-top: 22px; width: 100%; padding: 12px; background: var(--green);
+    color: #fff; border: none; border-radius: 8px; font-size: 0.95rem;
+    cursor: pointer; font-weight: 600; transition: background 0.2s, transform 0.1s;
+  }
+  .login-box button:hover { background: var(--green-light); }
+  .login-box button:active { transform: scale(0.99); }
+  .error-msg { color: #c0392b; font-size: 0.83rem; margin-top: 10px; min-height: 1em; }
+
+  /* PAINEL */
+  .panel-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 22px; flex-wrap: wrap; gap: 8px;
+  }
+  .panel-header h2 { margin: 0; font-size: 1.3rem; }
+  .panel-header .count { font-size: 0.85rem; color: #6b7390; }
+
+  .upload-card {
+    background: #fff; padding: 24px; border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(20,30,60,0.07); margin-bottom: 30px;
+    border: 1px solid var(--border);
+  }
+  .upload-card h3 { margin: 0 0 4px; font-size: 1rem; }
+  .upload-card .upload-sub { margin: 0 0 16px; font-size: 0.8rem; color: #788; }
+
+  .dropzone {
+    border: 2px dashed var(--border); border-radius: 10px;
+    padding: 22px; text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: #6b7390;
+  }
+  .dropzone:hover, .dropzone.dragover { border-color: var(--green-light); background: rgba(46,125,79,0.04); }
+  .dropzone svg { opacity: 0.5; }
+  .dropzone .dz-text { font-size: 0.88rem; }
+  .dropzone .dz-text strong { color: var(--green); }
+  .dropzone input[type="file"] { display: none; }
+
+  .preview-row {
+    display: none; align-items: center; gap: 14px; margin-top: 16px;
+    padding: 10px; background: #f7f8fb; border-radius: 8px;
+  }
+  .preview-row.active { display: flex; }
+  .preview-row img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; }
+  .preview-row .file-name { font-size: 0.82rem; flex: 1; word-break: break-all; color: #444; }
+  .preview-row .remove-preview {
+    background: none; border: none; color: #c0392b; cursor: pointer; font-size: 1.1rem; padding: 4px;
+  }
+
+  .upload-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+  .upload-row input[type="text"] {
+    flex: 1; min-width: 200px; padding: 10px 13px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 0.9rem;
+  }
+  .upload-row input[type="text"]:focus { outline: none; border-color: var(--green-light); }
+  .upload-row button {
+    background: var(--green); color: #fff; border: none; padding: 11px 22px;
+    border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+  .upload-row button:hover:not(:disabled) { background: var(--green-light); }
+  .upload-row button:disabled { opacity: 0.55; cursor: default; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: #fff; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 4px 16px rgba(20,30,60,0.09); position: relative;
+    border: 1px solid var(--border);
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(20,30,60,0.16); }
+  .card .thumb-wrap { position: relative; aspect-ratio: 4/3; overflow: hidden; background: #e9ebf1; }
+  .card .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card .alt { font-size: 0.78rem; padding: 10px 12px; color: #3a4a6b; }
+  .card .del {
+    position: absolute; top: 8px; right: 8px; background: rgba(20,30,60,0.55);
+    color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%;
+    cursor: pointer; font-size: 1rem; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.18s, background 0.18s;
+  }
+  .card:hover .del { opacity: 1; }
+  .card .del:hover { background: #c0392b; }
+  .empty {
+    color: #888; font-size: 0.9rem; text-align: center; padding: 40px 0;
+    grid-column: 1 / -1;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 1 1 8 0v4"/></svg>
+    <div>
+      <h1>Painel Admin</h1>
+      <div class="subtitle">C&amp;C Soluções</div>
+    </div>
+  </div>
+  <button id="logoutBtn" style="display:none">Sair</button>
+</header>
+
+<div id="loginView" class="login-wrap">
+  <div class="login-box">
+    <div class="lock-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 1 1 8 0v4"/></svg>
+    </div>
+    <h2>Acesso restrito</h2>
+    <p class="hint">Entre com suas credenciais para gerenciar a galeria.</p>
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" required autocomplete="username">
+      <label for="password">Senha</label>
+      <input type="password" id="password" required autocomplete="current-password">
+      <button type="submit">Entrar</button>
+      <div class="error-msg" id="loginError"></div>
+    </form>
+  </div>
+</div>
+
+<div id="panelView" class="wrap" style="display:none">
+  <div class="upload-card">
+    <h3>Adicionar nova foto</h3>
+    <p class="upload-sub">Selecione ou arraste uma imagem para a galeria de obras.</p>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label class="dropzone" id="dropzone">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span class="dz-text"><strong>Clique para escolher</strong> ou arraste a imagem aqui</span>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" required>
+      </label>
+      <div class="preview-row" id="previewRow">
+        <img id="previewImg" alt="Pré-visualização">
+        <span class="file-name" id="previewName"></span>
+        <button type="button" class="remove-preview" id="removePreview" title="Remover seleção">&times;</button>
+      </div>
+      <div class="upload-row">
+        <input type="text" id="altInput" placeholder="Descrição da foto (opcional)">
+        <button type="submit">Enviar foto</button>
+      </div>
+    </form>
+    <div class="error-msg" id="uploadError"></div>
+  </div>
+
+  <div class="panel-header">
+    <h2>Galeria de obras</h2>
+    <span class="count" id="photoCount"></span>
+  </div>
+  <div id="grid" class="grid"></div>
+</div>
+
+<script>
+const loginView = document.getElementById('loginView');
+const panelView = document.getElementById('panelView');
+const logoutBtn = document.getElementById('logoutBtn');
+
+async function checkSession() {
+  const r = await fetch('/api/session');
+  const data = await r.json();
+  if (data.isAdmin) showPanel(); else showLogin();
+}
+
+function showLogin() {
+  loginView.style.display = 'flex';
+  panelView.style.display = 'none';
+  logoutBtn.style.display = 'none';
+}
+
+function showPanel() {
+  loginView.style.display = 'none';
+  panelView.style.display = 'block';
+  logoutBtn.style.display = 'inline-block';
+  loadPhotos();
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  const r = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await r.json();
+  if (r.ok) { showPanel(); }
+  else { errEl.textContent = data.error || 'Falha no login.'; }
+});
+
+logoutBtn.addEventListener('click', async () => {
+  await fetch('/api/logout', { method: 'POST' });
+  showLogin();
+});
+
+async function loadPhotos() {
+  const r = await fetch('/api/photos');
+  const photos = await r.json();
+  const grid = document.getElementById('grid');
+  document.getElementById('photoCount').textContent =
+    photos.length === 1 ? '1 foto' : `${photos.length} fotos`;
+  grid.innerHTML = '';
+  if (!photos.length) {
+    grid.innerHTML = '<p class="empty">Nenhuma foto na galeria ainda.</p>';
+    return;
+  }
+  photos.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="thumb-wrap">
+        <img src="img/obras/${p.file}" alt="${p.alt}">
+        <button class="del" title="Remover" data-id="${p.id}">&times;</button>
+      </div>
+      <div class="alt">${p.alt}</div>
+    `;
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll('.del').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Remover esta foto da galeria?')) return;
+      await fetch('/api/photos/' + btn.dataset.id, { method: 'DELETE' });
+      loadPhotos();
+    });
+  });
+}
+
+// ─── DROPZONE / PREVIEW ───
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const previewRow = document.getElementById('previewRow');
+const previewImg = document.getElementById('previewImg');
+const previewName = document.getElementById('previewName');
+
+function setPreview(file) {
+  if (!file) { previewRow.classList.remove('active'); return; }
+  previewImg.src = URL.createObjectURL(file);
+  previewName.textContent = file.name;
+  previewRow.classList.add('active');
+}
+
+fileInput.addEventListener('change', () => setPreview(fileInput.files[0]));
+
+['dragover', 'dragenter'].forEach(evt =>
+  dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); })
+);
+['dragleave', 'dragend'].forEach(evt =>
+  dropzone.addEventListener(evt, () => dropzone.classList.remove('dragover'))
+);
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) {
+    fileInput.files = e.dataTransfer.files;
+    setPreview(e.dataTransfer.files[0]);
+  }
+});
+
+document.getElementById('removePreview').addEventListener('click', () => {
+  fileInput.value = '';
+  setPreview(null);
+});
+
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const altInput = document.getElementById('altInput');
+  const errEl = document.getElementById('uploadError');
+  errEl.textContent = '';
+  if (!fileInput.files[0]) return;
+  const fd = new FormData();
+  fd.append('photo', fileInput.files[0]);
+  fd.append('alt', altInput.value || 'Obra C&C Soluções');
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  try {
+    const r = await fetch('/api/photos', { method: 'POST', body: fd });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erro ao enviar.');
+    fileInput.value = '';
+    altInput.value = '';
+    setPreview(null);
+    loadPhotos();
+  } catch (err) {
+    errEl.textContent = err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+checkSession();
+</script>
+</body>
+</html>

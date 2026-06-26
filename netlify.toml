@@ -1,0 +1,17 @@
+# Troque "SEU-BACKEND" pela URL real do backend depois de publicá-lo no Render
+# (ex: https://ccsolucoes-backend.onrender.com)
+
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://SEU-BACKEND.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/img/obras/*"
+  to = "https://SEU-BACKEND.onrender.com/img/obras/:splat"
+  status = 200
+  force = true
